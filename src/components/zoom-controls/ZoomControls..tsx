@@ -1,3 +1,8 @@
+import {
+  CANVAS_MAX_ZOOM,
+  CANVAS_MIN_ZOOM,
+  CANVAS_ZOOM_STEP,
+} from "@/constants/canvas";
 import { setZoomPercentage } from "@/features/canvas/canvasSlice";
 import { useAppSelector } from "@/hooks/useAppSelector";
 import { MinusIcon, PlusIcon } from "lucide-react";
@@ -10,9 +15,17 @@ const ZoomControls = () => {
   );
 
   const handleZoomIn = () =>
-    dispatch(setZoomPercentage(Math.min(zoomPercentage + 10, 500)));
+    dispatch(
+      setZoomPercentage(
+        Math.min(zoomPercentage + CANVAS_ZOOM_STEP, CANVAS_MAX_ZOOM)
+      )
+    );
   const handleZoomOut = () =>
-    dispatch(setZoomPercentage(Math.max(zoomPercentage - 10, 10)));
+    dispatch(
+      setZoomPercentage(
+        Math.max(zoomPercentage - CANVAS_ZOOM_STEP, CANVAS_MIN_ZOOM)
+      )
+    );
 
   return (
     <div className="fixed bottom-4 left-4 flex items-center gap-2 bg-gray-200 shadow-lg rounded-md">

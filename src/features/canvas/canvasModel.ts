@@ -7,7 +7,9 @@ export type CanvasElementType =
   | "text"
   | "arrow"
   | "rhombus"
-  | "pencil";
+  | "pencil"
+  | "eraser"
+  | "image";
 
 export type CanvasBaseElement = {
   ID: string;
@@ -16,25 +18,33 @@ export type CanvasBaseElement = {
   y: number;
   width: number;
   height: number;
-  fill?: string;
-  strokeWidth?: number;
-  strokeColor?: string;
   angle?: number;
-  zIndex: number;
+  opacity: number;
+  strokeColor?: string;
+  layer: number;
   createdAt: number;
 };
 
-export type CanvasRectangle = CanvasBaseElement & {
+export type CanvasShapeType = "rectangle" | "circle" | "rhombus";
+
+export type CanvasShape = CanvasBaseElement & {
+  type: CanvasShapeType;
+  fill: string;
+  strokeWidth?: number;
+  strokeStyle?: string;
+};
+
+export type CanvasRectangle = CanvasShape & {
   type: "rectangle";
   borderRadius?: number;
 };
 
-export type CanvasRhombus = CanvasBaseElement & {
+export type CanvasRhombus = CanvasShape & {
   type: "rhombus";
   borderRadius?: number;
 };
 
-export type CanvasCircle = CanvasBaseElement & {
+export type CanvasCircle = CanvasShape & {
   type: "circle";
 };
 
@@ -51,10 +61,12 @@ export type CanvasText = CanvasBaseElement & {
 
 export type CanvasLine = CanvasBaseElement & {
   type: "line";
+  strokeWidth: number;
 };
 
 export type CanvasArrow = CanvasBaseElement & {
   type: "arrow";
+  strokeWidth: number;
 };
 
 export type CanvasPoint = { x: number; y: number };
@@ -62,6 +74,7 @@ export type CanvasPoint = { x: number; y: number };
 export type CanvasPencil = CanvasBaseElement & {
   type: "pencil";
   points: CanvasPoint[];
+  strokeWidth: number;
 };
 
 export type CanvasElement =
@@ -72,6 +85,15 @@ export type CanvasElement =
   | CanvasArrow
   | CanvasRhombus
   | CanvasPencil;
+
+export type CanvasElementKeys =
+  | keyof CanvasText
+  | keyof CanvasRectangle
+  | keyof CanvasCircle
+  | keyof CanvasLine
+  | keyof CanvasArrow
+  | keyof CanvasRhombus
+  | keyof CanvasPencil;
 
 export type CanvasToolID =
   | "select"
@@ -91,6 +113,14 @@ export type CanvasTool = {
   label: string;
   icon: LucideIcon;
 };
+
+export type LayerDirection = "up" | "down" | "top" | "bottom";
+
+export type CanvasShapeHandlePosition =
+  | "top-left"
+  | "top-right"
+  | "bottom-left"
+  | "bottom-right";
 
 export interface CanvasState {
   elements: CanvasElement[];

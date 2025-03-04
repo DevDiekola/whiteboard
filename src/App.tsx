@@ -1,4 +1,5 @@
 import Canvas from "./components/canvas/Canvas";
+import PropertiesBar from "./components/properties-bar/PropertiesBar";
 import Toolbar from "./components/toolbar/Toolbar";
 import ZoomControls from "./components/zoom-controls/ZoomControls.";
 import useUndoRedoShortcut from "./hooks/useUndoRedoShortcut";
@@ -12,6 +13,7 @@ const App = () => {
       <Canvas />
       <Toolbar />
       <ZoomControls />
+      <PropertiesBar />
     </div>
   );
 };

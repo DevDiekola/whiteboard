@@ -1,13 +1,22 @@
 import { CanvasElement } from "@/features/canvas/canvasModel";
-import { updateElement } from "@/features/canvas/canvasSlice";
 
 type Props = {
   element: CanvasElement;
+  className?: string;
   handleSelectElement?: (element: CanvasElement) => void;
+  handleDragElement?: (
+    e: React.MouseEvent<SVGGraphicsElement, MouseEvent>
+  ) => void;
   updateElement?: (element: CanvasElement) => void;
 };
 
-const Element: React.FC<Props> = ({ element, handleSelectElement }) => {
+const Element: React.FC<Props> = ({
+  element,
+  className,
+  handleDragElement,
+  handleSelectElement,
+  updateElement,
+}) => {
   if (element.type === "rectangle") {
     return (
       <rect
@@ -15,10 +24,18 @@ const Element: React.FC<Props> = ({ element, handleSelectElement }) => {
         y={element.y}
         width={element.width}
         height={element.height}
-        stroke="black"
-        fill="transparent"
-        strokeWidth={2}
+        fill={element.fill}
+        stroke={element.strokeColor}
+        strokeWidth={element.strokeWidth}
+        opacity={element.opacity}
+        transform={`rotate(${element.angle || 0}, ${
+          element.x + element.width / 2
+        }, ${element.y + element.height / 2})`}
+        rx={element.borderRadius}
+        z={element.layer}
+        className={className}
         onClick={() => handleSelectElement?.(element)}
+        onMouseDown={(e) => handleDragElement?.(e)}
       />
     );
   }
@@ -29,10 +46,17 @@ const Element: React.FC<Props> = ({ element, handleSelectElement }) => {
         cx={element.x + element.width / 2}
         cy={element.y + element.height / 2}
         r={radius}
-        stroke="black"
-        fill="transparent"
-        strokeWidth={2}
+        fill={element.fill}
+        stroke={element.strokeColor}
+        strokeWidth={element.strokeWidth}
+        opacity={element.opacity}
+        transform={`rotate(${element.angle || 0}, ${
+          element.x + element.width / 2
+        }, ${element.y + element.height / 2})`}
+        z={element.layer}
+        className={className}
         onClick={() => handleSelectElement?.(element)}
+        onMouseDown={(e) => handleDragElement?.(e)}
       />
     );
   }
@@ -51,10 +75,18 @@ const Element: React.FC<Props> = ({ element, handleSelectElement }) => {
     return (
       <polygon
         points={points}
-        stroke="black"
-        fill="transparent"
-        strokeWidth={2}
+        fill={element.fill}
+        stroke={element.strokeColor}
+        strokeWidth={element.strokeWidth}
+        opacity={element.opacity}
+        transform={`rotate(${element.angle || 0}, ${
+          element.x + element.width / 2
+        }, ${element.y + element.height / 2})`}
+        rx={element.borderRadius}
+        z={element.layer}
+        className={className}
         onClick={() => handleSelectElement?.(element)}
+        onMouseDown={(e) => handleDragElement?.(e)}
       />
     );
   }
@@ -66,9 +98,16 @@ const Element: React.FC<Props> = ({ element, handleSelectElement }) => {
         y1={element.y}
         x2={element.x + element.width}
         y2={element.y + element.height}
-        stroke="black"
-        strokeWidth={2}
+        stroke={element.strokeColor}
+        strokeWidth={element.strokeWidth}
+        opacity={element.opacity}
+        transform={`rotate(${element.angle || 0}, ${
+          element.x + element.width / 2
+        }, ${element.y + element.height / 2})`}
+        z={element.layer}
+        className={className}
         onClick={() => handleSelectElement?.(element)}
+        onMouseDown={(e) => handleDragElement?.(e)}
       />
     );
   }
@@ -82,7 +121,7 @@ const Element: React.FC<Props> = ({ element, handleSelectElement }) => {
 
     // Get angle for arrowhead
     const angle = Math.atan2(y2 - y1, x2 - x1);
-    const arrowSize = 15; // Arrowhead size
+    const arrowSize = 15 * Math.sqrt(element.strokeWidth); // Arrowhead size
 
     // Calculate arrowhead points
     const arrowX1 = x2 - arrowSize * Math.cos(angle - Math.PI / 6);
@@ -92,23 +131,31 @@ const Element: React.FC<Props> = ({ element, handleSelectElement }) => {
     const arrowY2 = y2 - arrowSize * Math.sin(angle + Math.PI / 6);
 
     return (
-      <>
+      <g
+        transform={`rotate(${element.angle || 0}, ${
+          element.x + element.width / 2
+        }, ${element.y + element.height / 2})`}
+        opacity={element.opacity}
+        className={className}
+        onClick={() => handleSelectElement?.(element)}
+        onMouseDown={(e) => handleDragElement?.(e)}
+      >
         {/* Line */}
         <line
           x1={x1}
           y1={y1}
           x2={x2}
           y2={y2}
-          stroke="black"
-          strokeWidth={2}
-          onClick={() => handleSelectElement?.(element)}
+          stroke={element.strokeColor}
+          strokeWidth={element.strokeWidth}
+          z={element.layer}
         />
         {/* Arrowhead */}
         <polygon
           points={`${x2},${y2} ${arrowX1},${arrowY1} ${arrowX2},${arrowY2}`}
-          fill="black"
+          fill={element.strokeColor} // setting this to stroke color intentionally since the arrow type does not have a stroke color
         />
-      </>
+      </g>
     );
   }
 
@@ -118,11 +165,18 @@ const Element: React.FC<Props> = ({ element, handleSelectElement }) => {
     return (
       <polyline
         points={pointsString}
-        stroke="black"
         fill="none"
-        strokeWidth={2}
+        stroke={element.strokeColor}
+        strokeWidth={element.strokeColor}
+        transform={`rotate(${element.angle || 0}, ${
+          element.x + element.width / 2
+        }, ${element.y + element.height / 2})`}
+        opacity={element.opacity}
         strokeLinecap="round"
         strokeLinejoin="round"
+        className={className}
+        onClick={() => handleSelectElement?.(element)}
+        onMouseDown={(e) => handleDragElement?.(e)}
       />
     );
   }
@@ -134,19 +188,38 @@ const Element: React.FC<Props> = ({ element, handleSelectElement }) => {
         y={element.y}
         width={element.width}
         height={element.height}
+        opacity={element.opacity}
+        z={element.layer}
+        className={className}
+        onClick={() => handleSelectElement?.(element)}
+        onMouseDown={(e) => handleDragElement?.(e)}
       >
         <textarea
-          value={element.text}
-          onChange={(e) => updateElement({ ...element, text: e.target.value })}
+          contentEditable
+          onChange={(e) =>
+            updateElement?.({
+              ...element,
+              text: e.target.value || "",
+            })
+          }
           style={{
-            fontSize: "25px",
-            fontFamily: "Arial",
+            fontSize: `${element.fontSize}px`,
+            fontWeight: element.fontWeight,
+            fontFamily: element.fontFamily,
             width: `${element.width}px`,
-            height: `${element.height}px`,
-            border: "1px solid black",
+            minHeight: `${element.height}px`,
+            color: element.strokeColor,
+            textAlign: element.textAlign,
+            lineHeight: element.lineHeight,
+            whiteSpace: "pre-wrap",
+            overflowWrap: "break-word",
             outline: "none",
+            resize: "none",
+            overflow: "hidden",
           }}
-        />
+        >
+          {element.text}
+        </textarea>
       </foreignObject>
     );
   }

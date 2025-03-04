@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/tooltip";
 import { TOOLBAR_TOOLS } from "@/constants/canvas";
 import { CanvasToolID } from "@/features/canvas/canvasModel";
-import { selectTool } from "@/features/canvas/canvasSlice";
+import { selectTool, setSelectedElement } from "@/features/canvas/canvasSlice";
 import { useAppSelector } from "@/hooks/useAppSelector";
 import { cn } from "@/lib/utils";
 import { useDispatch } from "react-redux";
@@ -19,6 +19,7 @@ const Toolbar = () => {
   const dispatch = useDispatch();
 
   const handleSelectTool = (toolID: CanvasToolID) => {
+    dispatch(setSelectedElement(undefined));
     dispatch(selectTool(toolID));
   };
 
