@@ -19,6 +19,10 @@
 
 - **Layer (Z-Index) Management**
 
+- **Local Persistence**
+
+- **NO image support yet**
+
 - **Keyboard Shortcuts**  
   `Delete` (Windows) or `CMD + delete` (MacOS) to delete an element
 
