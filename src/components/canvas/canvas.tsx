@@ -172,6 +172,7 @@ const Canvas = () => {
       height: 0,
       opacity: 1,
       layer: 1,
+      strokeColor: "#000000",
       createdAt: Date.now(),
     };
 
@@ -198,6 +199,7 @@ const Canvas = () => {
         textAlign: "left",
         verticalAlign: "top",
         lineHeight: 1.2,
+        strokeColor: "#000000",
       };
 
       newCanvasElement = newTextElement;
@@ -253,7 +255,7 @@ const Canvas = () => {
       if (prev.type === "pencil") {
         return {
           ...newElement,
-          points: [...(prev.points || []), { x: currentX, y: currentY }],
+          points: [...(prev.points ?? []), { x: currentX, y: currentY }],
         };
       }
 
@@ -274,7 +276,6 @@ const Canvas = () => {
     }
 
     dispatch(addElement(currentElement));
-    // dispatch(setSelectedElement(currentElement));
 
     setIsDrawing(false);
     setCurrentElement(undefined);
@@ -339,14 +340,11 @@ const Canvas = () => {
       return;
     }
 
-    // Determine new zoom percentage
-    const newZoom = Math.round(
-      Math.min(
-        CANVAS_MAX_ZOOM,
-        Math.max(
-          CANVAS_MIN_ZOOM,
-          zoomPercentage - e.deltaY * CANVAS_ZOOM_DELTA * CANVAS_ZOOM_STEP
-        )
+    const newZoom = Math.min(
+      CANVAS_MAX_ZOOM,
+      Math.max(
+        CANVAS_MIN_ZOOM,
+        zoomPercentage - e.deltaY * CANVAS_ZOOM_DELTA * CANVAS_ZOOM_STEP
       )
     );
 
@@ -369,14 +367,18 @@ const Canvas = () => {
   };
 
   const handleResizeStart = (
-    e: React.MouseEvent,
+    e: React.MouseEvent<SVGGraphicsElement>,
     pos: CanvasShapeHandlePosition
   ) => {
-    e.stopPropagation(); // Prevent selection
+    e.stopPropagation(); // Had to use this to prevent unselecting. It basically prevents further propagation of the event.
+
+    const svgCoords = getSVGElementCoordinates(e);
+
+    if (!svgCoords) return;
 
     setIsResizing(true);
     setResizeHandlePosition(pos);
-    setResizeStartPoint({ x: e.clientX, y: e.clientY });
+    setResizeStartPoint({ x: svgCoords.x, y: svgCoords.y });
   };
 
   const handleResizeMove = (e: React.MouseEvent<SVGSVGElement>) => {
@@ -394,25 +396,46 @@ const Canvas = () => {
     const dx = svgCoords.x - resizeStartPoint.x;
     const dy = svgCoords.y - resizeStartPoint.y;
 
+    console.log({
+      resizeHandlePosition,
+      x,
+      y,
+      resizeStartPointX: resizeStartPoint.x,
+      resizeStartPointY: resizeStartPoint.y,
+      coordX: svgCoords.x,
+      coordY: svgCoords.y,
+      width,
+      height,
+      dx,
+      dy,
+    });
+
     if (resizeHandlePosition === "top-left") {
       newX = x + dx;
       newY = y + dy;
       newWidth = width - dx;
       newHeight = height - dy;
     } else if (resizeHandlePosition === "top-right") {
-      newY = y + dy;
-      newWidth = width + dx;
-      newHeight = height - dy;
+      const fixedX = selectedElement.x;
+      const fixedY = selectedElement.y + selectedElement.height;
+      newX = fixedX; // element's x position remains unchanged since we are dragging on the right side
+      newY = Math.min(svgCoords.y, fixedY);
+      newWidth = svgCoords.x - fixedX;
+      newHeight = fixedY - newY;
     } else if (resizeHandlePosition === "bottom-left") {
-      newX = x + dx;
-      newWidth = width - dx;
-      newHeight = height + dy;
+      const fixedX = selectedElement.x + selectedElement.width;
+      const fixedY = selectedElement.y;
+      newY = fixedY; // y remains unchanged (we are dragging on the bottom so we are not impacting the y position)
+      newX = Math.min(svgCoords.x, fixedX);
+      newWidth = fixedX - newX;
+      newHeight = svgCoords.y - fixedY;
     } else if (resizeHandlePosition === "bottom-right") {
-      newWidth = width + dx;
-      newHeight = height + dy;
+      // Neither our x or y position changes here, we are only resizing
+      newWidth = svgCoords.x - selectedElement.x;
+      newHeight = svgCoords.y - selectedElement.y;
     }
 
-    // I'm doing this to ensure size doesn't go negative
+    // I'm doing this to ensure size doesn't go negative for whatever reason
     if (newWidth < 5) {
       newX = x;
       newWidth = 5;
@@ -445,24 +468,17 @@ const Canvas = () => {
   ) => {
     if (!selectedElement) return;
 
-    e.stopPropagation(); // Prevent unselecting
+    e.stopPropagation(); // Prevents unselecting of the element
 
     setIsDragging(true);
 
-    // Calculate new element position
     const svgCoords = getSVGElementCoordinates(e);
 
     if (!svgCoords) return;
 
-    // console.log("X", svgCoords.x, e.clientX);
-    // console.log("Y", svgCoords.y, e.clientY);
-
     // Calculate offset from mouse to element origin
     const offsetX = svgCoords.x - selectedElement.x;
     const offsetY = svgCoords.y - selectedElement.y;
-
-    // const offsetX = selectedElement.x;
-    // const offsetY = selectedElement.y;
 
     setDraggingStartPoint({ x: offsetX, y: offsetY });
   };
@@ -470,7 +486,6 @@ const Canvas = () => {
   const handleDragMove = (e: React.MouseEvent<SVGSVGElement, MouseEvent>) => {
     if (!isDragging || !selectedElement || !draggingStartPoint) return;
 
-    // Calculate new element position
     const svgCoords = getSVGCoordinates(e);
     const newX = svgCoords.x - draggingStartPoint.x;
     const newY = svgCoords.y - draggingStartPoint.y;

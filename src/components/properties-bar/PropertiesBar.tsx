@@ -49,7 +49,7 @@ const PropertiesBar = () => {
   };
 
   return (
-    <div className="fixed top-0 bottom-0 right-0 w-64 h-[100dvh] p-4 bg-white border-l flex flex-col space-y-4 overflow-y-auto">
+    <div className="fixed top-0 bottom-0 right-0 w-64 h-[100dvh] p-4 pb-6 bg-white border-l space-y-4 overflow-y-auto">
       <h3 className="text-lg font-semibold">Properties</h3>
 
       {/* General CanvasBaseElement Properties */}
@@ -58,12 +58,12 @@ const PropertiesBar = () => {
         <div className="flex space-x-2">
           <Input
             type="number"
-            value={selectedElement.x}
+            value={Math.round(selectedElement.x)}
             onChange={(e) => handleChange("x", Number(e.target.value))}
           />
           <Input
             type="number"
-            value={selectedElement.y}
+            value={Math.round(selectedElement.y)}
             onChange={(e) => handleChange("y", Number(e.target.value))}
           />
         </div>
@@ -74,12 +74,12 @@ const PropertiesBar = () => {
         <div className="flex space-x-2">
           <Input
             type="number"
-            value={selectedElement.width}
+            value={Math.round(selectedElement.width)}
             onChange={(e) => handleChange("width", Number(e.target.value))}
           />
           <Input
             type="number"
-            value={selectedElement.height}
+            value={Math.round(selectedElement.height)}
             onChange={(e) => handleChange("height", Number(e.target.value))}
           />
         </div>
@@ -95,7 +95,7 @@ const PropertiesBar = () => {
         />
       </div>
 
-      {/* Commenting this out for now until I figure out how to handle it properly - aligning the positions, resize box e.t.c */}
+      {/* Commenting this out for now until I figure out how to handle the rotation properly - aligning the positions, resize box e.t.c */}
       {/* <div className="space-y-2">
         <label className="block text-sm font-medium">Angle</label>
         <Slider
@@ -132,13 +132,13 @@ const PropertiesBar = () => {
         </div>
       </div>
 
-      {/* Shape-Specific Properties */}
+      {/* Shape/Element-Specific Properties */}
       {selectedElement.type === "text" && (
         <>
           <div className="space-y-2">
             <label className="block text-sm font-medium">Text</label>
             <Input
-              value={selectedElement.text || "YOOO"}
+              value={selectedElement.text ?? ""}
               onChange={(e) => handleChange("text", e.target.value)}
             />
           </div>
@@ -191,56 +191,59 @@ const PropertiesBar = () => {
             <label className="block text-sm font-medium">Fill Color</label>
             <ColorPalette
               colors={FILL_COLORS}
-              selectedColor={selectedElement.fill || "transparent"}
+              selectedColor={selectedElement.fill ?? "transparent"}
               setSelectedColor={(color) => handleChange("fill", color)}
             />
           </div>
-
-          <div className="space-y-2">
-            <label className="block text-sm font-medium">Stroke Color</label>
-            <ColorPalette
-              colors={STROKE_COLORS}
-              selectedColor={selectedElement.strokeColor || "transparent"}
-              setSelectedColor={(color) => handleChange("strokeColor", color)}
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="block text-sm font-medium">Stroke Width</label>
-            <div className="flex gap-3">
-              <IconButton
-                isActive={selectedElement.strokeWidth === 0}
-                onClick={() => handleChange("strokeWidth", 0)}
-              >
-                <BanIcon />
-              </IconButton>
-              <IconButton
-                isActive={selectedElement.strokeWidth === 2}
-                onClick={() => handleChange("strokeWidth", 2)}
-              >
-                <SlashIcon strokeWidth={1} />
-              </IconButton>
-              <IconButton
-                isActive={selectedElement.strokeWidth === 4}
-                onClick={() => handleChange("strokeWidth", 4)}
-              >
-                <SlashIcon strokeWidth={2} />
-              </IconButton>
-              <IconButton
-                isActive={selectedElement.strokeWidth === 6}
-                onClick={() => handleChange("strokeWidth", 6)}
-              >
-                <SlashIcon strokeWidth={3} />
-              </IconButton>
-              <IconButton
-                isActive={selectedElement.strokeWidth === 8}
-                onClick={() => handleChange("strokeWidth", 8)}
-              >
-                <SlashIcon strokeWidth={4} />
-              </IconButton>
-            </div>
-          </div>
         </>
       )}
+
+      {selectedElement.type !== "text" && (
+        <div className="space-y-2">
+          <label className="block text-sm font-medium">Stroke Width</label>
+          <div className="flex gap-3">
+            <IconButton
+              isActive={selectedElement.strokeWidth === 0}
+              onClick={() => handleChange("strokeWidth", 0)}
+            >
+              <BanIcon />
+            </IconButton>
+            <IconButton
+              isActive={selectedElement.strokeWidth === 2}
+              onClick={() => handleChange("strokeWidth", 2)}
+            >
+              <SlashIcon strokeWidth={1} />
+            </IconButton>
+            <IconButton
+              isActive={selectedElement.strokeWidth === 4}
+              onClick={() => handleChange("strokeWidth", 4)}
+            >
+              <SlashIcon strokeWidth={2} />
+            </IconButton>
+            <IconButton
+              isActive={selectedElement.strokeWidth === 6}
+              onClick={() => handleChange("strokeWidth", 6)}
+            >
+              <SlashIcon strokeWidth={3} />
+            </IconButton>
+            <IconButton
+              isActive={selectedElement.strokeWidth === 8}
+              onClick={() => handleChange("strokeWidth", 8)}
+            >
+              <SlashIcon strokeWidth={4} />
+            </IconButton>
+          </div>
+        </div>
+      )}
+
+      <div className="space-y-2">
+        <label className="block text-sm font-medium">Stroke Color</label>
+        <ColorPalette
+          colors={STROKE_COLORS}
+          selectedColor={selectedElement.strokeColor ?? "transparent"}
+          setSelectedColor={(color) => handleChange("strokeColor", color)}
+        />
+      </div>
 
       {(selectedElement.type === "rectangle" ||
         selectedElement.type === "rhombus") && (

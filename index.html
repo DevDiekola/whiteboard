@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height" />
     <title>Whiteboard</title>
   </head>
   <body>
@@ -13,7 +13,7 @@
       // Adding this script to prevent pinch zooming on the whole page
       // Zooming is still possible on the canvas
       document.addEventListener('wheel', function (event) {
-        if (event.scale !== 1) { event.preventDefault(); }
+        if (event.ctrlKey) { event.preventDefault(); }
       }, { passive: false });
     </script>
   </body>

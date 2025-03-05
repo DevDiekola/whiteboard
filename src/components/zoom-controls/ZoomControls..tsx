@@ -32,7 +32,9 @@ const ZoomControls = () => {
       <button onClick={handleZoomOut} className="p-3 rounded-md cursor-pointer">
         <MinusIcon size={20} />
       </button>
-      <span className="w-12 text-center font-medium">{zoomPercentage}%</span>
+      <span className="w-12 text-center font-medium">
+        {Math.round(zoomPercentage)}%
+      </span>
       <button onClick={handleZoomIn} className="p-3 rounded-md cursor-pointer">
         <PlusIcon size={20} />
       </button>
